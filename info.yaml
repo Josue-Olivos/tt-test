@@ -39,18 +39,18 @@ pinout:
   uo[3]: "RESULT[3]"
   uo[4]: "CARRY_OUT"
   uo[5]: "ZERO_FLAG"
-  uo[6]: "UNUSED"
-  uo[7]: "UNUSED"
+  uo[6]: ""
+  uo[7]: ""
 
   # Bidirectional pins
   uio[0]: "OPCODE[0]"
   uio[1]: "OPCODE[1]"
   uio[2]: "OPCODE[2]"
-  uio[3]: "UNUSED"
-  uio[4]: "UNUSED"
-  uio[5]: "UNUSED"
-  uio[6]: "UNUSED"
-  uio[7]: "UNUSED"
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
 
 # Do not change!
 yaml_version: 6
