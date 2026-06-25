@@ -1,4 +1,3 @@
-python
 # SPDX-FileCopyrightText: © 2024 Tiny Tapeout
 # SPDX-License-Identifier: Apache-2.0
 
@@ -119,4 +118,3 @@ async def test_project(dut):
     assert result(dut) == 4
 
     dut._log.info("ALL ALU TESTS PASSED")
-```
