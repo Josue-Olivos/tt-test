@@ -2,39 +2,108 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import cocotb
-from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import Timer
+
+
+def set_alu_inputs(dut, a, b, opcode):
+    dut.ui_in.value = ((b & 0xF) << 4) | (a & 0xF)
+    dut.uio_in.value = opcode
+
+
+def result(dut):
+    return int(dut.uo_out.value) & 0xF
+
+
+def carry(dut):
+    return (int(dut.uo_out.value) >> 4) & 1
+
+
+def zero(dut):
+    return (int(dut.uo_out.value) >> 5) & 1
 
 
 @cocotb.test()
 async def test_project(dut):
-    dut._log.info("Start")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
-    cocotb.start_soon(clock.start())
+    dut._log.info("Starting ALU tests")
 
-    # Reset
-    dut._log.info("Reset")
     dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
 
-    dut._log.info("Test project behavior")
+    #
+    # ADD
+    #
+    set_alu_inputs(dut, 5, 3, 0b000)
+    await Timer(1, unit="ns")
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+    assert result(dut) == 8
+    assert carry(dut) == 0
+    assert zero(dut) == 0
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+    #
+    # ADD WITH CARRY
+    #
+    set_alu_inputs(dut, 15, 1, 0b000)
+    await Timer(1, unit="ns")
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+    assert result(dut) == 0
+    assert carry(dut) == 1
+    assert zero(dut) == 1
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    #
+    # SUBTRACT
+    #
+    set_alu_inputs(dut, 8, 3, 0b001)
+    await Timer(1, unit="ns")
+
+    assert result(dut) == 5
+
+    #
+    # AND
+    #
+    set_alu_inputs(dut, 12, 10, 0b010)
+    await Timer(1, unit="ns")
+
+    assert result(dut) == 8
+
+    #
+    # OR
+    #
+    set_alu_inputs(dut, 12, 10, 0b011)
+    await Timer(1, unit="ns")
+
+    assert result(dut) == 14
+
+    #
+    # XOR
+    #
+    set_alu_inputs(dut, 15, 5, 0b100)
+    await Timer(1, unit="ns")
+
+    assert result(dut) == 10
+
+    #
+    # NOT
+    #
+    set_alu_inputs(dut, 10, 0, 0b101)
+    await Timer(1, unit="ns")
+
+    assert result(dut) == 5
+
+    #
+    # SHIFT LEFT
+    #
+    set_alu_inputs(dut, 7, 0, 0b110)
+    await Timer(1, unit="ns")
+
+    assert result(dut) == 14
+
+    #
+    # SHIFT RIGHT
+    #
+    set_alu_inputs(dut, 8, 0, 0b111)
+    await Timer(10, unit="ns")
+
+    assert result(dut) == 4
+
+    dut._log.info("ALL ALU TESTS PASSED")
